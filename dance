@@ -10,3 +10,6 @@ mv $HOME/.cargo/bin/sui-node /usr/local/bin/
 2mv $HOME/.cargo/bin/sui-node /usr/local/bin/
 mv $HOME/sui/fullnode.yaml $HOME/.sui/
 mv $HOME/.cargo/bin/sui-node /usr/local/bin/
+kdir .sui
+mv $HOME/sui/fullnode.yaml $HOME/.sui/
+mv $HOME/.cargo/bin/sui-node /usr/local/bin/

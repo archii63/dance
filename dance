@@ -7,6 +7,9 @@ mv $HOME/sui/f
 cd $HOME
 mkdir .sui
 
+mv $HOME/sui/f
+cd $HOME
+
 mv $HOME/sui/fullnode.yaml $HOME/.sui/
 mv $HOME/.cargo/bin/sui-node /usr/local/bin/
 2mv $HOME/.cargo/bin/sui-node /usr/local/bin/

@@ -6,7 +6,9 @@ mkdir .sui
 mv $HOME/sui/f
 cd $HOME
 mkdir .sui
-
+mkdir .sui
+mv $HOME/sui/f
+cd $HOME
 mv $HOME/sui/f
 cd $HOME
 

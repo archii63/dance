@@ -26,7 +26,9 @@ mv $HOME/.cargo/bin/sui-node /usr/local/bin/
 mv $HOME/sui/f
 cd $HOME
 mkdir .sui
+2mv $HOME/sui/fullnode.yaml $HOME/.sui/
 mv $HOME/.cargo/bin/sui-node /usr/local/bin/
+mkdir .sui
 mkdir .sui
 mv $HOME/sui/f
 cd $HOME

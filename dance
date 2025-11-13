@@ -17,7 +17,11 @@ cd $HOME
 cd $HOME
 mv $HOME/sui/fullnode.yaml $HOME/.sui/
 mv $HOME/.cargo/bin/sui-node /usr/local/bin/
-2mv $HOME/sui/fullnode.yaml $HOME/.sui/
+2mv $HOME/s
+mv $HOME/sui/f
+cd $HOME
+mv $HOME/sui/fullnode.yaml $HOME/.sui/
+mv $HOME/.cargo/bin/sui-node /usr$HOME/.sui/
 mv $HOME/.cargo/bin/sui-node /usr/local/bin/
 mv $HOME/sui/fullnode.yaml $HOME/.sui/
 mv $HOME/.cargo/bin/sui-node /usr/local/bin/

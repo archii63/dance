@@ -1,0 +1,31 @@
+def greet(name: str) -> str:
+    return f"Hello, {name}! Welcome to this GitHub project."
+
+if __name__ == "__main__":
+    user_name = input("Enter your name: ")
+    print(greet(user_name))
+# Simple Greeting Project
+
+This is a simple Python project that asks for the user's name and prints a greeting message.
+
+## Features
+- Minimal and clean code
+- Easy to understand
+- Good for beginners who want to upload their first GitHub project
+
+## How to Run
+
+1. Make sure Python 3 is installed.
+2. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/your-repo-name.git
+python app.py
+
+---
+
+If you want, I can also:  
+✅ create a full GitHub-ready folder structure  
+✅ generate more advanced code (web app, API, chatbot, etc.)  
+✅ write the entire README for you
+
+Would you like that?

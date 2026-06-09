@@ -8,10 +8,6 @@ if __name__ == "__main__":
 
 This is a simple Python project that asks for the user's name and prints a greeting message.
 
-## Features
-- Minimal and clean code
-- Easy to understand
-- Good for beginners who want to upload their first GitHub project
 
 ## How to Run
 
@@ -33,3 +29,7 @@ If you want, I can also:
 ✅ write the entire README for you
 
 Would you like that?
+## Features
+- Minimal and clean code
+- Easy to understand
+- Good for beginners who want to upload their first GitHub project

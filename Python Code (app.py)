@@ -1,36 +1,285 @@
-def greet(name: str) -> str:
-    return f"Hello, {name}! Welcome to this GitHub project."
+# PulseForge
+
+**PulseForge** is a lightweight API health and performance monitor built with Python.
+
+It checks multiple endpoints, measures response latency, detects failures, and produces structured reports that can be used locally or inside CI/CD pipelines.
+
+## Features
+
+* Monitor multiple HTTP/HTTPS endpoints
+* Measure response time
+* Detect HTTP errors and timeouts
+* Configurable request timeout
+* Concurrent endpoint checks
+* JSON report generation
+* Simple CLI interface
+* Non-zero exit code when a service is unhealthy
+* Easy integration with GitHub Actions
+
+## Project Structure
+
+```text
+pulseforge/
+├── pulseforge/
+│   ├── __init__.py
+│   ├── checker.py
+│   └── cli.py
+├── config.json
+├── requirements.txt
+├── README.md
+└── .gitignore
+```
+
+## Installation
+
+```bash
+git clone https://github.com/yourusername/pulseforge.git
+cd pulseforge
+
+python -m venv .venv
+source .venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+## Configuration
+
+Create a `config.json` file:
+
+```json
+{
+  "timeout": 5,
+  "endpoints": [
+    {
+      "name": "Example API",
+      "url": "https://api.example.com"
+    },
+    {
+      "name": "Example Website",
+      "url": "https://example.com"
+    }
+  ]
+}
+```
+
+## Core Implementation
+
+```python
+# pulseforge/checker.py
+
+from __future__ import annotations
+
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import asdict, dataclass
+from typing import Iterable
+
+import requests
+
+
+@dataclass
+class CheckResult:
+    name: str
+    url: str
+    status_code: int | None
+    latency_ms: float | None
+    healthy: bool
+    error: str | None = None
+
+
+def check_endpoint(endpoint: dict, timeout: float) -> CheckResult:
+    name = endpoint["name"]
+    url = endpoint["url"]
+
+    start = time.perf_counter()
+
+    try:
+        response = requests.get(
+            url,
+            timeout=timeout,
+            headers={"User-Agent": "PulseForge/1.0"},
+        )
+
+        latency = (time.perf_counter() - start) * 1000
+
+        return CheckResult(
+            name=name,
+            url=url,
+            status_code=response.status_code,
+            latency_ms=round(latency, 2),
+            healthy=200 <= response.status_code < 400,
+        )
+
+    except requests.RequestException as exc:
+        return CheckResult(
+            name=name,
+            url=url,
+            status_code=None,
+            latency_ms=None,
+            healthy=False,
+            error=str(exc),
+        )
+
+
+def run_checks(
+    endpoints: Iterable[dict],
+    timeout: float = 5,
+    workers: int = 8,
+) -> list[dict]:
+
+    results = []
+
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = [
+            executor.submit(check_endpoint, endpoint, timeout)
+            for endpoint in endpoints
+        ]
+
+        for future in as_completed(futures):
+            results.append(asdict(future.result()))
+
+    return results
+```
+
+### CLI
+
+```python
+# pulseforge/cli.py
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+from .checker import run_checks
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="PulseForge API health monitor"
+    )
+
+    parser.add_argument(
+        "config",
+        type=Path,
+        help="Path to configuration JSON file",
+    )
+
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("pulseforge-report.json"),
+        help="Output report path",
+    )
+
+    args = parser.parse_args()
+
+    with args.config.open("r", encoding="utf-8") as file:
+        config = json.load(file)
+
+    results = run_checks(
+        endpoints=config["endpoints"],
+        timeout=config.get("timeout", 5),
+        workers=config.get("workers", 8),
+    )
+
+    report = {
+        "total": len(results),
+        "healthy": sum(item["healthy"] for item in results),
+        "failed": sum(not item["healthy"] for item in results),
+        "results": results,
+    }
+
+    with args.output.open("w", encoding="utf-8") as file:
+        json.dump(report, file, indent=2)
+
+    for result in results:
+        status = "UP" if result["healthy"] else "DOWN"
+
+        latency = (
+            f'{result["latency_ms"]} ms'
+            if result["latency_ms"] is not None
+            else "N/A"
+        )
+
+        print(
+            f'[{status}] {result["name"]} '
+            f'| {result["url"]} | {latency}'
+        )
+
+    if report["failed"] > 0:
+        sys.exit(1)
+
 
 if __name__ == "__main__":
-    user_name = input("Enter your name: ")
-    print(greet(user_name))
-# Simple Greeting Project
+    main()
+```
 
-This is a simple Python project that asks for the user's name and prints a greeting message.
+### requirements.txt
 
+```text
+requests>=2.32.0,<3.0.0
+```
 
-## How to Run
+### Usage
 
-1. Make sure Python 3 is installed.
-2. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/your-repo-name.git
-python app.py
-Minimal and clean code
-- Easy to understand
-- Good for beginners who want to upload their first GitHub project
----
-- Minimal and clean code
-- Easy to understand
-- Good for beginners who want to upload their first GitHub project
-If you want, I can also:  
-✅ create a full GitHub-ready folder structure  
-✅ generate more advanced code (web app, API, chatbot, etc.)  
-✅ write the entire README for you
+```bash
+python -m pulseforge.cli config.json
+```
 
-Would you like that?
-## Feature
-- Easy to understands
-- Minimal and clean code
-- Easy to understand
-- Good for beginners who want to upload their first GitHub project
+Example output:
+
+```text
+[UP] Example API | https://api.example.com | 184.21 ms
+[UP] Example Website | https://example.com | 96.42 ms
+[DOWN] Payment API | https://payment.example.com | N/A
+```
+
+A JSON report will also be generated:
+
+```json
+{
+  "total": 3,
+  "healthy": 2,
+  "failed": 1,
+  "results": [
+    {
+      "name": "Example API",
+      "url": "https://api.example.com",
+      "status_code": 200,
+      "latency_ms": 184.21,
+      "healthy": true,
+      "error": null
+    }
+  ]
+}
+```
+
+## Why PulseForge?
+
+PulseForge is intentionally small, dependency-light, and automation-friendly.
+
+It can be used as:
+
+* An API monitoring utility
+* A lightweight uptime checker
+* A CI/CD health gate
+* A debugging tool for distributed services
+* A foundation for a larger observability platform
+
+## Roadmap
+
+* [ ] Retry policies
+* [ ] Historical latency tracking
+* [ ] Webhook notifications
+* [ ] Slack/Discord integrations
+* [ ] Prometheus metrics
+* [ ] Docker image
+* [ ] GitHub Actions workflow
+* [ ] Persistent time-series storage
+
+## License
+
+MIT License
